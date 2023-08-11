@@ -2,7 +2,8 @@
   "name": "scratchtools",
   "displayName": "ScratchTools",
   "description": "",
-  "version": "0.0.1",
+  "icon":"icon.png",
+  "version": "0.0.1-alpha",
   "engines": {
     "vscode": "^1.81.0"
   },
@@ -14,7 +15,10 @@
   "contributes": {
     "commands": [{
       "command": "scratchtools.helloWorld",
-      "title": "Hello World"
+      "title": "ScratchTools: Hello World"
+    },{
+      "command": "scratchtools.toolbox",
+      "title": "ScratchTools: Open Toolbox"
     }]
   },
   "scripts": {
