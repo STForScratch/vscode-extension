@@ -1,15 +1,22 @@
 {
-  "$schema": "http://json-schema.org/draft-07/schema#",
-  "title": "ScratchTools features.json",
+  "$schema": "http://json-schema.org/draft-04/schema#",
   "type": "array",
   "items": {
     "type": "object",
-    "required": ["version", "id", "versionAdded"],
     "properties": {
-      "version": { "type": "integer", "enum": [2] },
-      "id": { "type": "string" },
-      "versionAdded": { "type": "string" }
+      "version": {
+        "description": "The version of the feature.",
+        "type": "integer"
+      },
+      "dateAdded": {
+        "description": "The date when the feature was added.",
+        "type": "string"
+      },
+      "id": {
+        "description": "The unique identifier for the feature.",
+        "type": "string"
+      }
     },
-    "additionalProperties": false
+    "required": ["id"]
   }
 }

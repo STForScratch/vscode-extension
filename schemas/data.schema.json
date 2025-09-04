@@ -1,80 +1,90 @@
 {
-  "$schema": "http://json-schema.org/draft-07/schema#",
-  "title": "ScratchTools Feature data.json",
+  "$schema": "http://json-schema.org/draft-04/schema#",
   "type": "object",
-  "required": ["title", "description", "credits", "type", "dynamic", "default", "resources", "options", "scripts", "styles"],
   "properties": {
-    "title": { "type": "string" },
-    "description": { "type": "string" },
+    "title": {
+      "description": "The title for the feature.",
+      "type": "string"
+    },
+    "description": {
+      "description": "The description for the feature.",
+      "type": "string"
+    },
     "credits": {
+      "description": "The credits for the feature.",
       "type": "array",
-      "items": {
-        "type": "object",
-        "required": ["username", "url"],
-        "properties": {
-          "username": { "type": "string" },
-          "url": { "type": "string", "format": "uri" }
-        },
-        "additionalProperties": false
-      }
-    },
-    "type": {
-      "type": "array",
-      "items": { "type": "string", "enum": ["Website", "Forums", "Editor", "Egg"] },
-      "minItems": 1
-    },
-    "tags": { "type": "array", "items": { "type": "string" } },
-    "dynamic": { "type": "boolean" },
-    "default": { "type": "boolean" },
-    "resources": {
-      "type": "array",
-      "items": {
-        "type": "object",
-        "required": ["name", "path"],
-        "properties": {
-          "name": { "type": "string" },
-          "path": { "type": "string" }
-        },
-        "additionalProperties": false
-      }
-    },
-    "options": {
-      "type": "array",
-      "items": {
-        "type": "object",
-        "required": ["id", "name", "type"],
-        "properties": {
-          "id": { "type": "string" },
-          "name": { "type": "string" },
-          "type": { "type": "integer", "enum": [0,1,2,3] }
-        },
-        "additionalProperties": true
-      }
+      "items": [
+        {
+          "description": "A credit for the feature.",
+          "type": "object",
+          "properties": {
+            "username": {
+              "description": "The username for the credit.",
+              "type": "string"
+            },
+            "url": {
+              "description": "The profile URL for the credit.",
+              "type": "string"
+            }
+          },
+          "required": [
+            "username",
+            "url"
+          ]
+        }
+      ]
     },
     "scripts": {
       "type": "array",
-      "items": {
-        "type": "object",
-        "required": ["file", "runOn"],
-        "properties": {
-          "file": { "type": "string" },
-          "runOn": { "type": "string" }
-        },
-        "additionalProperties": false
-      }
+      "items": [
+        {
+          "type": "object",
+          "properties": {
+            "file": {
+              "description": "The file path for the script.",
+              "type": "string"
+            },
+            "runOn": {
+              "description": "The page regex for the script.",
+              "type": "string"
+            },
+            "pageType": {
+              "description": "The page type for the script (2 or 3).",
+              "type": "integer"
+            }
+          },
+          "required": [
+            "file"
+          ]
+        }
+      ]
     },
     "styles": {
       "type": "array",
-      "items": {
-        "type": "object",
-        "required": ["file", "runOn"],
-        "properties": {
-          "file": { "type": "string" },
-          "runOn": { "type": "string" }
-        },
-        "additionalProperties": false
-      }
+      "items": [
+        {
+          "type": "object",
+          "properties": {
+            "file": {
+              "description": "The file path for the style.",
+              "type": "string"
+            },
+            "runOn": {
+              "description": "The page regex for the style.",
+              "type": "string"
+            }
+          },
+          "required": [
+            "file",
+            "runOn"
+          ]
+        }
+      ]
     }
   },
-  "additionalProperties": true
+  "required": [
+    "title",
+    "description",
+    "credits"
+  ]
 }
