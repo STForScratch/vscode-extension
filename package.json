@@ -52,7 +52,23 @@
     },{
       "command": "scratchtools.openFeatureData",
       "title": "ScratchTools: Open Feature data.json",
-      "icon": "$(file-code)"
+      "icon": "$(file)"
+    },{
+      "command": "scratchtools.searchFeatures",
+      "title": "ScratchTools: Search Features",
+      "icon": "$(search)"
+    },{
+      "command": "scratchtools.openNode",
+      "title": "ScratchTools: Open",
+      "icon": "$(go-to-file)"
+    },{
+      "command": "scratchtools.featureAdd",
+      "title": "ScratchTools: Add to Feature",
+      "icon": "$(add)"
+    },{
+      "command": "scratchtools.deleteFeature",
+      "title": "ScratchTools: Delete Feature",
+      "icon": "$(trash)"
     }],
     "viewsContainers": {
       "activitybar": [
@@ -83,28 +99,28 @@
           "command": "scratchtools.addFeature",
           "when": "view == scratchtoolsFeatures",
           "group": "navigation@2"
+        },
+        {
+          "command": "scratchtools.searchFeatures",
+          "when": "view == scratchtoolsFeatures",
+          "group": "navigation@3"
         }
       ],
       "view/item/context": [
         {
-          "command": "scratchtools.openFeatureData",
-          "when": "view == scratchtoolsFeatures && viewItem == scratchtoolsFeature",
+          "command": "scratchtools.openNode",
+          "when": "view == scratchtoolsFeatures && viewItem =~ /scratchtools.*/",
           "group": "inline@0"
         },
         {
-          "command": "scratchtools.addUserscript",
+          "command": "scratchtools.featureAdd",
           "when": "view == scratchtoolsFeatures && viewItem == scratchtoolsFeature",
           "group": "inline@1"
         },
         {
-          "command": "scratchtools.addUserstyle",
+          "command": "scratchtools.deleteFeature",
           "when": "view == scratchtoolsFeatures && viewItem == scratchtoolsFeature",
           "group": "inline@2"
-        },
-        {
-          "command": "scratchtools.addResource",
-          "when": "view == scratchtoolsFeatures && viewItem == scratchtoolsFeature",
-          "group": "inline@3"
         }
       ]
     },
