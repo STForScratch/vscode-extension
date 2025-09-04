@@ -14,7 +14,16 @@
   "categories": [
     "Other"
   ],
-  "activationEvents": [],
+  "activationEvents": [
+    "onView:scratchtoolsFeatures",
+    "onCommand:scratchtools.toolbox",
+    "onCommand:scratchtools.addFeature",
+    "onCommand:scratchtools.addUserscript",
+    "onCommand:scratchtools.addUserstyle",
+    "onCommand:scratchtools.addResource",
+    "onCommand:scratchtools.refreshFeatures",
+    "onCommand:scratchtools.openFeatureData"
+  ],
   "main": "./extension.js",
   "contributes": {
     "commands": [{
@@ -22,17 +31,83 @@
       "title": "ScratchTools: Open Toolbox"
     },{
       "command": "scratchtools.addFeature",
-      "title": "ScratchTools: Add Feature"
+      "title": "ScratchTools: Add Feature",
+      "icon": "$(add)"
     },{
       "command": "scratchtools.addUserscript",
-      "title": "ScratchTools: Add Userscript"
+      "title": "ScratchTools: Add Userscript",
+      "icon": "$(file-code)"
     },{
       "command": "scratchtools.addUserstyle",
-      "title": "ScratchTools: Add Userstyle"
+      "title": "ScratchTools: Add Userstyle",
+      "icon": "$(symbol-color)"
     },{
       "command": "scratchtools.addResource",
-      "title": "ScratchTools: Add Resource"
+      "title": "ScratchTools: Add Resource",
+      "icon": "$(file-media)"
+    },{
+      "command": "scratchtools.refreshFeatures",
+      "title": "ScratchTools: Refresh Features",
+      "icon": "$(refresh)"
+    },{
+      "command": "scratchtools.openFeatureData",
+      "title": "ScratchTools: Open Feature data.json",
+      "icon": "$(file-code)"
     }],
+    "viewsContainers": {
+      "activitybar": [
+        {
+          "id": "scratchtoolsViewContainer",
+          "title": "ScratchTools",
+          "icon": "icon.svg"
+        }
+      ]
+    },
+    "views": {
+      "scratchtoolsViewContainer": [
+        {
+          "id": "scratchtoolsFeatures",
+          "icon": "icon.svg",
+          "name": "Features"
+        }
+      ]
+    },
+    "menus": {
+      "view/title": [
+        {
+          "command": "scratchtools.refreshFeatures",
+          "when": "view == scratchtoolsFeatures",
+          "group": "navigation@1"
+        },
+        {
+          "command": "scratchtools.addFeature",
+          "when": "view == scratchtoolsFeatures",
+          "group": "navigation@2"
+        }
+      ],
+      "view/item/context": [
+        {
+          "command": "scratchtools.openFeatureData",
+          "when": "view == scratchtoolsFeatures && viewItem == scratchtoolsFeature",
+          "group": "inline@0"
+        },
+        {
+          "command": "scratchtools.addUserscript",
+          "when": "view == scratchtoolsFeatures && viewItem == scratchtoolsFeature",
+          "group": "inline@1"
+        },
+        {
+          "command": "scratchtools.addUserstyle",
+          "when": "view == scratchtoolsFeatures && viewItem == scratchtoolsFeature",
+          "group": "inline@2"
+        },
+        {
+          "command": "scratchtools.addResource",
+          "when": "view == scratchtoolsFeatures && viewItem == scratchtoolsFeature",
+          "group": "inline@3"
+        }
+      ]
+    },
     "keybindings": [
       {
         "command": "scratchtools.toolbox",

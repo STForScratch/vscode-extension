@@ -148,12 +148,12 @@ async function runAddFeatureFlow() {
 
 async function promptForFeatureId() { return getInput('Feature ID'); }
 
-async function addUserscriptFlow() {
+async function addUserscriptFlow(target) {
     try {
         const folders = vscode.workspace.workspaceFolders;
         if (!folders || folders.length === 0) { vscode.window.showErrorMessage('Open a workspace.'); return; }
         const root = folders[0].uri.fsPath;
-        const id = await promptForFeatureId(); if (!id) return;
+    const id = (target && target.featureId) || await promptForFeatureId(); if (!id) return;
         const runOn = await getInput('runOn (e.g., "/" or "/projects/*")'); if (!runOn) return;
         const fileName = await getInput('Script file name (e.g., script.js)'); if (!fileName) return;
 
@@ -175,12 +175,12 @@ async function addUserscriptFlow() {
     }
 }
 
-async function addUserstyleFlow() {
+async function addUserstyleFlow(target) {
     try {
         const folders = vscode.workspace.workspaceFolders;
         if (!folders || folders.length === 0) { vscode.window.showErrorMessage('Open a workspace.'); return; }
         const root = folders[0].uri.fsPath;
-        const id = await promptForFeatureId(); if (!id) return;
+    const id = (target && target.featureId) || await promptForFeatureId(); if (!id) return;
         const runOn = await getInput('runOn (e.g., "/" or "/projects/*")'); if (!runOn) return;
         const fileName = await getInput('Style file name (e.g., style.css)'); if (!fileName) return;
 
@@ -202,12 +202,12 @@ async function addUserstyleFlow() {
     }
 }
 
-async function addResourceFlow() {
+async function addResourceFlow(target) {
     try {
         const folders = vscode.workspace.workspaceFolders;
         if (!folders || folders.length === 0) { vscode.window.showErrorMessage('Open a workspace.'); return; }
         const root = folders[0].uri.fsPath;
-        const id = await promptForFeatureId(); if (!id) return;
+    const id = (target && target.featureId) || await promptForFeatureId(); if (!id) return;
         const name = await getInput('Resource name (used in code)'); if (!name) return;
         const picked = await vscode.window.showOpenDialog({ canSelectMany: false, openLabel: 'Pick resource file' });
         if (!picked || picked.length === 0) return;
