@@ -1,65 +1,49 @@
-# scratchtools README
+# ScratchTools for VS Code
 
-This is the README for your extension "scratchtools". After writing up a brief description, we recommend including the following sections.
+A helper extension for developing ScratchTools features. Quickly scaffold feature JSON, and manage your project files right from VS Code.
 
 ## Features
 
-Describe specific features of your extension including screenshots of your extension in action. Image paths are relative to this README file.
+Current commands:
 
-For example if there is an image subfolder under your extension project workspace:
+- ScratchTools: Add Feature — prompts for a title, id, description, and versionAdded; creates `features/<id>/data.json` and updates `features/features.json`.
+	- Leave versionAdded blank to auto-use the current project version (from manifest.json or package.json).
 
-\!\[feature X\]\(images/feature-x.png\)
+## Add a new feature (command palette)
 
-> Tip: Many popular extensions utilize animations. This is an excellent way to show off your extension! We recommend short, focused animations that are easy to follow.
+Open the Command Palette and run "ScratchTools: Add Feature". You'll be prompted for:
+
+- Feature title
+- Feature ID (creates `features/<id>/`)
+- Feature description
+- versionAdded (leave blank to auto-detect)
+
+What it does:
+
+- Creates `features/<id>/data.json` with a starter template per the ScratchTools docs.
+- Inserts an entry at the top of `features/features.json` array: `{ version: 2, id, versionAdded }`.
+
+References:
+
+- Feature JSON: https://docs.scratchtools.app/docs/contributing/featurejson
+- Adding to features.json: https://docs.scratchtools.app/docs/contributing/allfeatures
 
 ## Requirements
 
-If you have any requirements or dependencies, add a section describing those and how to install and configure them.
+No special requirements.
 
 ## Extension Settings
 
-Include if your extension adds any VS Code settings through the `contributes.configuration` extension point.
-
-For example:
-
-This extension contributes the following settings:
-
-* `myExtension.enable`: Enable/disable this extension.
-* `myExtension.thing`: Set to `blah` to do something.
+This extension does not add any settings.
 
 ## Known Issues
 
-Calling out known issues can help limit users opening duplicate issues against your extension.
+macOS VS Code test harness can be flaky (spawn path). Packaging and runtime are unaffected.
 
 ## Release Notes
 
-Users appreciate release notes as you update your extension.
-
-### 1.0.0
-
-Initial release of ...
-
-### 1.0.1
-
-Fixed issue #.
-
-### 1.1.0
-
-Added features X, Y, and Z.
+See CHANGELOG.md for details.
 
 ---
-
-## Working with Markdown
-
-You can author your README using Visual Studio Code.  Here are some useful editor keyboard shortcuts:
-
-* Split the editor (`Cmd+\` on macOS or `Ctrl+\` on Windows and Linux)
-* Toggle preview (`Shift+Cmd+V` on macOS or `Shift+Ctrl+V` on Windows and Linux)
-* Press `Ctrl+Space` (Windows, Linux, macOS) to see a list of Markdown snippets
-
-## For more information
-
-* [Visual Studio Code's Markdown Support](http://code.visualstudio.com/docs/languages/markdown)
-* [Markdown Syntax Reference](https://help.github.com/articles/markdown-basics/)
 
 **Enjoy!**

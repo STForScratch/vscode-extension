@@ -6,4 +6,7 @@ Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how 
 
 ## [Unreleased]
 
+### Added
+- Command: ScratchTools: Add Feature — scaffolds `features/<id>/data.json` and updates `features/features.json`.
+
 - Initial release

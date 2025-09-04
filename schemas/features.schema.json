@@ -1,0 +1,15 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "ScratchTools features.json",
+  "type": "array",
+  "items": {
+    "type": "object",
+    "required": ["version", "id", "versionAdded"],
+    "properties": {
+      "version": { "type": "integer", "enum": [2] },
+      "id": { "type": "string" },
+      "versionAdded": { "type": "string" }
+    },
+    "additionalProperties": false
+  }
+}
