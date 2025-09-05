@@ -119,6 +119,11 @@
           "group": "inline@2"
         },
         {
+          "command": "scratchtools.deleteFeature",
+          "when": "view == scratchtoolsFeatures && viewItem == scratchtoolsLegacyFeature",
+          "group": "inline@2"
+        },
+        {
           "command": "scratchtools.deleteNode",
           "when": "view == scratchtoolsFeatures && (viewItem == scratchtoolsScript || viewItem == scratchtoolsStyle || viewItem == scratchtoolsResource)",
           "group": "inline@3"

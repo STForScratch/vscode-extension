@@ -31,32 +31,77 @@ function activate(context) {
   context.subscriptions.push(vscode.commands.registerCommand('scratchtools.deleteFeature', async (node) => {
     try {
       if (!node || !node.featureId) return;
+      const isLegacy = node.kind === 'v1';
+      const targetLabel = isLegacy && node.label ? String(node.label) : node.featureId;
       const confirm = await vscode.window.showWarningMessage(
-        `Delete feature "${node.featureId}"? This removes its folder and list entry.`,
+        isLegacy
+          ? `Delete legacy feature "${targetLabel}"? This removes its list entry and linked file if found.`
+          : `Delete feature "${targetLabel}"? This removes its folder and list entry.`,
         { modal: true }, 'Delete'
       );
       if (confirm !== 'Delete') return;
       const folders = vscode.workspace.workspaceFolders;
       if (!folders || folders.length === 0) return;
       const root = folders[0].uri.fsPath;
-      const featureDir = path.join(root, 'features', node.featureId);
-      if (fs.existsSync(featureDir)) {
-        fs.rmSync(featureDir, { recursive: true, force: true });
-      }
-      // Remove from features/features.json if present
-      try {
-        const listPath = path.join(root, 'features', 'features.json');
-        if (fs.existsSync(listPath)) {
-          const arr = JSON.parse(fs.readFileSync(listPath, 'utf8') || '[]');
-          if (Array.isArray(arr)) {
-            const next = arr.filter(e => !(e && e.id === node.featureId));
-            fs.writeFileSync(listPath, JSON.stringify(next, null, 2));
+      const featuresDir = path.join(root, 'features');
+
+      if (isLegacy) {
+        // Best-effort: remove linked JS file and legacy list entry.
+        const fileBase = node.fileBase || node.featureId;
+        // Delete guessed JS
+        try {
+          const guesses = [
+            path.join(featuresDir, `${fileBase}.js`),
+            path.join(root, `${fileBase}.js`)
+          ];
+          for (const g of guesses) {
+            if (fs.existsSync(g)) {
+              fs.rmSync(g, { force: true });
+              break;
+            }
           }
+        } catch (e) {
+          console.warn('Failed deleting legacy linked file:', e);
         }
-      } catch (e) {
-        console.warn('Failed updating features list during delete:', e);
+        // Remove from list by file field
+        try {
+          const listPath = path.join(featuresDir, 'features.json');
+          if (fs.existsSync(listPath)) {
+            const arr = JSON.parse(fs.readFileSync(listPath, 'utf8') || '[]');
+            if (Array.isArray(arr)) {
+              const next = arr.filter(e => {
+                if (!e || typeof e !== 'object') return true;
+                if (typeof e.version === 'number' && e.version === 2) return true; // leave v2 entries untouched
+                // legacy shape: remove if file matches
+                return e.file !== fileBase;
+              });
+              fs.writeFileSync(listPath, JSON.stringify(next, null, 2));
+            }
+          }
+        } catch (e) {
+          console.warn('Failed updating legacy features list during delete:', e);
+        }
+        vscode.window.showInformationMessage(`Deleted legacy feature ${targetLabel}`);
+      } else {
+        // v2: delete folder and list entry by id
+        const featureDir = path.join(featuresDir, node.featureId);
+        if (fs.existsSync(featureDir)) {
+          fs.rmSync(featureDir, { recursive: true, force: true });
+        }
+        try {
+          const listPath = path.join(featuresDir, 'features.json');
+          if (fs.existsSync(listPath)) {
+            const arr = JSON.parse(fs.readFileSync(listPath, 'utf8') || '[]');
+            if (Array.isArray(arr)) {
+              const next = arr.filter(e => !(e && e.id === node.featureId));
+              fs.writeFileSync(listPath, JSON.stringify(next, null, 2));
+            }
+          }
+        } catch (e) {
+          console.warn('Failed updating features list during delete:', e);
+        }
+        vscode.window.showInformationMessage(`Deleted feature ${targetLabel}`);
       }
-      vscode.window.showInformationMessage(`Deleted feature ${node.featureId}`);
       provider.refresh();
     } catch (e) {
       vscode.window.showErrorMessage(`Delete failed: ${e.message}`);
