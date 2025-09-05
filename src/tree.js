@@ -156,7 +156,7 @@ class FeaturesProvider {
       const children = [];
 
       // data.json
-      const dataUri = vscode.Uri.file(dataPath);
+  const dataUri = vscode.Uri.file(dataPath);
   children.push(new FileItem('data.json', undefined, dataUri, undefined, `Feature metadata (${id})`, 'scratchtoolsData'));
 
       // parse data.json for arrays

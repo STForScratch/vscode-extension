@@ -108,6 +108,124 @@ function activate(context) {
     }
   }));
 
+  // Delete a single file node (scripts/styles/resources), not data.json
+  context.subscriptions.push(vscode.commands.registerCommand('scratchtools.deleteNode', async (node) => {
+    try {
+      if (!node || !node.resourceUri) return;
+      const fsPath = node.resourceUri.fsPath;
+      const base = path.basename(fsPath);
+      if (base === 'data.json') {
+        vscode.window.showWarningMessage('data.json cannot be deleted here.');
+        return;
+      }
+      const confirm = await vscode.window.showWarningMessage(
+        `Delete file "${base}"?`,
+        { modal: true },
+        'Delete'
+      );
+      if (confirm !== 'Delete') return;
+      // Capture file contents for undo
+      let fileBuffer;
+      try {
+        if (fs.existsSync(fsPath)) { fileBuffer = fs.readFileSync(fsPath); }
+      } catch (e) { /* ignore */ }
+
+      // Find the nearest data.json and update arrays, tracking removed entries + indices for undo
+      let dataPath;
+      let removed = { scripts: [], styles: [], resources: [] };
+      try {
+        const featureDir = path.dirname(fsPath);
+        let dir = featureDir;
+        for (let i = 0; i < 3; i++) {
+          const tryPath = path.join(dir, 'data.json');
+          if (fs.existsSync(tryPath)) { dataPath = tryPath; break; }
+          const next = path.dirname(dir);
+          if (next === dir) break;
+          dir = next;
+        }
+        if (dataPath && fs.existsSync(dataPath)) {
+          const raw = fs.readFileSync(dataPath, 'utf8');
+          const json = JSON.parse(raw);
+          const rel = path.basename(fsPath);
+          let changed = false;
+          if (Array.isArray(json.scripts)) {
+            const next = [];
+            json.scripts.forEach((s, idx) => {
+              if (s && s.file === rel) { removed.scripts.push({ entry: s, index: idx }); changed = true; }
+              else next.push(s);
+            });
+            json.scripts = next;
+          }
+          if (Array.isArray(json.styles)) {
+            const next = [];
+            json.styles.forEach((s, idx) => {
+              if (s && s.file === rel) { removed.styles.push({ entry: s, index: idx }); changed = true; }
+              else next.push(s);
+            });
+            json.styles = next;
+          }
+          if (Array.isArray(json.resources)) {
+            const next = [];
+            json.resources.forEach((r, idx) => {
+              const p = (r && r.path ? String(r.path) : '').replace(/^\//, '');
+              if (p === rel) { removed.resources.push({ entry: r, index: idx }); changed = true; }
+              else next.push(r);
+            });
+            json.resources = next;
+          }
+          if (changed) {
+            fs.writeFileSync(dataPath, JSON.stringify(json, null, 2));
+          }
+        }
+      } catch (e) {
+        console.warn('Failed updating data.json after delete', e);
+      }
+
+      // Delete the file from disk
+      if (fs.existsSync(fsPath)) {
+        try { fs.rmSync(fsPath, { force: true }); } catch (e) { /* ignore */ }
+      }
+
+      // Offer Undo
+      const undo = await vscode.window.showInformationMessage(`Deleted ${base}`, 'Undo');
+      if (undo === 'Undo') {
+        try {
+          // Restore file
+          if (fileBuffer && !fs.existsSync(fsPath)) {
+            fs.writeFileSync(fsPath, fileBuffer);
+          }
+          // Restore data.json entries
+          if (dataPath && fs.existsSync(dataPath)) {
+            const raw = fs.readFileSync(dataPath, 'utf8');
+            const json = JSON.parse(raw);
+            if (!Array.isArray(json.scripts)) json.scripts = [];
+            if (!Array.isArray(json.styles)) json.styles = [];
+            if (!Array.isArray(json.resources)) json.resources = [];
+            removed.scripts.sort((a,b)=>a.index-b.index).forEach(({entry, index}) => {
+              const pos = Math.min(index, json.scripts.length);
+              json.scripts.splice(pos, 0, entry);
+            });
+            removed.styles.sort((a,b)=>a.index-b.index).forEach(({entry, index}) => {
+              const pos = Math.min(index, json.styles.length);
+              json.styles.splice(pos, 0, entry);
+            });
+            removed.resources.sort((a,b)=>a.index-b.index).forEach(({entry, index}) => {
+              const pos = Math.min(index, json.resources.length);
+              json.resources.splice(pos, 0, entry);
+            });
+            fs.writeFileSync(dataPath, JSON.stringify(json, null, 2));
+          }
+          vscode.window.showInformationMessage(`Restored ${base}`);
+        } catch (e) {
+          vscode.window.showErrorMessage(`Undo failed: ${e.message}`);
+        }
+      }
+      provider.refresh();
+    } catch (e) {
+      vscode.window.showErrorMessage(`Delete failed: ${e.message}`);
+    }
+  }));
+
   const toolbox = vscode.commands.registerCommand("scratchtools.toolbox", async () => {
     try {
       const quickPickData = [
