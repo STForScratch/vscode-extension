@@ -232,7 +232,8 @@ module.exports = {
     addUserscriptFlow,
     addUserstyleFlow,
     addResourceFlow,
-    convertV1ToV2Flow
+    convertV1ToV2Flow,
+    renameFeatureIdFlow
 };
 
 async function convertV1ToV2Flow(target) {
@@ -319,4 +320,94 @@ async function convertV1ToV2Flow(target) {
         return;
     }
     vscode.window.showInformationMessage(`Converted ${converted} legacy feature(s) to v2.`);
+}
+
+async function renameFeatureIdFlow(node) {
+    try {
+        const folders = vscode.workspace.workspaceFolders;
+        if (!folders || folders.length === 0) { vscode.window.showErrorMessage('Open a workspace.'); return; }
+        const root = folders[0].uri.fsPath;
+        const featuresDir = path.join(root, 'features');
+        const listPath = path.join(featuresDir, 'features.json');
+        if (!fs.existsSync(listPath)) { vscode.window.showErrorMessage('features/features.json not found.'); return; }
+
+        const isLegacy = node && node.kind === 'v1';
+        if (isLegacy) {
+            const oldBase = (node && (node.fileBase || node.featureId)) || '';
+            if (!oldBase) { vscode.window.showErrorMessage('No legacy feature file base to rename.'); return; }
+            const newBase = await vscode.window.showInputBox({ prompt: `New legacy feature base name (was "${oldBase}")`, value: oldBase });
+            if (!newBase || newBase.trim() === oldBase) return;
+            const trimmed = newBase.trim();
+            // Update legacy list entries
+            let arr;
+            try { arr = JSON.parse(fs.readFileSync(listPath, 'utf8') || '[]'); } catch (e) { vscode.window.showErrorMessage(`Could not parse features.json: ${e.message}`); return; }
+            if (!Array.isArray(arr)) { vscode.window.showErrorMessage('features.json is not an array.'); return; }
+            let changed = false;
+            const next = arr.map(e => {
+                if (e && typeof e === 'object' && e.version !== 2 && e.file === oldBase) {
+                    changed = true;
+                    return { ...e, file: trimmed };
+                }
+                return e;
+            });
+            if (!changed) {
+                vscode.window.showWarningMessage('No matching legacy list entry to update.');
+            } else {
+                fs.writeFileSync(listPath, JSON.stringify(next, null, 2));
+            }
+            // Rename legacy JS file if present
+            const candidates = [
+                path.join(featuresDir, `${oldBase}.js`),
+                path.join(root, `${oldBase}.js`)
+            ];
+            for (const oldPath of candidates) {
+                if (fs.existsSync(oldPath)) {
+                    const dest = path.join(path.dirname(oldPath), `${trimmed}.js`);
+                    if (fs.existsSync(dest)) {
+                        vscode.window.showErrorMessage(`Target file already exists: ${path.relative(root, dest)}`);
+                        break;
+                    }
+                    try { fs.renameSync(oldPath, dest); } catch (e) { vscode.window.showErrorMessage(`Failed to rename file: ${e.message}`); }
+                    break;
+                }
+            }
+            vscode.window.showInformationMessage(`Renamed legacy feature base "${oldBase}" → "${trimmed}"`);
+            return;
+        }
+
+        // v2 feature id rename
+        const oldId = node && node.featureId;
+        if (!oldId) { vscode.window.showErrorMessage('No feature selected to rename.'); return; }
+        const newId = await vscode.window.showInputBox({ prompt: `New feature ID (was "${oldId}")`, value: oldId, validateInput: (v) => {
+            const name = (v || '').trim();
+            if (!name) return 'ID is required';
+            if (/[^a-zA-Z0-9_-]/.test(name)) return 'Use letters, numbers, - or _ only';
+            return null;
+        }});
+        if (!newId) return;
+        const trimmed = newId.trim();
+        if (trimmed === oldId) return;
+
+        const oldDir = path.join(featuresDir, oldId);
+        const newDir = path.join(featuresDir, trimmed);
+        if (!fs.existsSync(oldDir)) { vscode.window.showErrorMessage(`Folder not found: ${path.relative(root, oldDir)}`); return; }
+        if (fs.existsSync(newDir)) { vscode.window.showErrorMessage(`A feature with id "${trimmed}" already exists.`); return; }
+
+        // Validate list uniqueness
+        let arr;
+        try { arr = JSON.parse(fs.readFileSync(listPath, 'utf8') || '[]'); } catch (e) { vscode.window.showErrorMessage(`Could not parse features.json: ${e.message}`); return; }
+        if (!Array.isArray(arr)) { vscode.window.showErrorMessage('features.json is not an array.'); return; }
+        if (arr.some(e => e && e.version === 2 && e.id === trimmed)) { vscode.window.showErrorMessage(`features.json already has id "${trimmed}".`); return; }
+
+        // Rename folder
+        try { fs.renameSync(oldDir, newDir); } catch (e) { vscode.window.showErrorMessage(`Failed to rename folder: ${e.message}`); return; }
+
+        // Update features.json entry
+        const updated = arr.map(e => (e && e.version === 2 && e.id === oldId) ? { ...e, id: trimmed } : e);
+        try { fs.writeFileSync(listPath, JSON.stringify(updated, null, 2)); } catch (e) { vscode.window.showErrorMessage(`Failed to update features.json: ${e.message}`); return; }
+
+        vscode.window.showInformationMessage(`Renamed feature id "${oldId}" → "${trimmed}"`);
+    } catch (e) {
+        vscode.window.showErrorMessage(`Rename failed: ${e.message}`);
+    }
 }

@@ -1,7 +1,7 @@
 const vscode = require("vscode");
 const path = require('path');
 const fs = require('fs');
-const { runAddFeatureFlow, addUserscriptFlow, addUserstyleFlow, addResourceFlow, convertV1ToV2Flow } = require('./src/feature');
+const { runAddFeatureFlow, addUserscriptFlow, addUserstyleFlow, addResourceFlow, convertV1ToV2Flow, renameFeatureIdFlow } = require('./src/feature');
 const { FeaturesProvider } = require('./src/tree');
 
 function activate(context) {
@@ -16,7 +16,7 @@ function activate(context) {
 
   // Inline actions: add submenu and delete
   context.subscriptions.push(vscode.commands.registerCommand('scratchtools.featureAdd', async (node) => {
-    const choice = await vscode.window.showQuickPick([
+  const choice = await vscode.window.showQuickPick([
       { label: '$(file-code) Add Userscript', action: 'script' },
       { label: '$(symbol-color) Add Userstyle', action: 'style' },
       { label: '$(file-media) Add Resource', action: 'resource' }
@@ -277,7 +277,8 @@ function activate(context) {
         { label: "$(add) Add a new feature", description: "Add a new feature to your ScratchTools project" },
         { label: "$(file-code) Add Userscript", description: "Create a userscript and attach it to data.json" },
         { label: "$(symbol-color) Add Userstyle", description: "Create a userstyle and attach it to data.json" },
-        { label: "$(file-media) Add Resource", description: "Copy a file into the feature and register it as a resource" },
+  { label: "$(file-media) Add Resource", description: "Copy a file into the feature and register it as a resource" },
+  { label: "$(edit) Rename Feature ID", description: "Refactor a feature id (v2) or legacy base name (v1)" },
         { label: "$(arrow-right) Convert legacy to v2", description: "Migrate legacy entries to v2" }
       ];
       const selection = await vscode.window.showQuickPick(quickPickData);
@@ -286,6 +287,7 @@ function activate(context) {
       if (selection.label === "$(file-code) Add Userscript") await addUserscriptFlow();
       if (selection.label === "$(symbol-color) Add Userstyle") await addUserstyleFlow();
       if (selection.label === "$(file-media) Add Resource") await addResourceFlow();
+  if (selection.label === "$(edit) Rename Feature ID") await renameFeatureIdFlow();
       if (selection.label === "$(arrow-right) Convert legacy to v2") await convertV1ToV2Flow();
       provider.refresh();
     } catch (e) {
@@ -315,6 +317,12 @@ function activate(context) {
   context.subscriptions.push(vscode.commands.registerCommand('scratchtools.convertV1ToV2', async (node) => {
     try { await convertV1ToV2Flow(node); provider.refresh(); }
     catch (e) { vscode.window.showErrorMessage(`Convert failed: ${e.message}`); }
+  }));
+
+  // Rename / Refactor Feature ID (context on v2 & v1)
+  context.subscriptions.push(vscode.commands.registerCommand('scratchtools.renameFeature', async (node) => {
+    try { await renameFeatureIdFlow(node); provider.refresh(); }
+    catch (e) { vscode.window.showErrorMessage(`Rename failed: ${e.message}`); }
   }));
 
   // Open data.json from selected feature in tree

@@ -4,6 +4,17 @@ All notable changes to this project will be documented in this file.
 
 The format is based on Keep a Changelog and this project adheres to Semantic Versioning.
 
+## [1.0.3] - 2025-09-05
+
+### Added
+- Rename Feature ID:
+	- For v2 features: renames the feature folder and updates `features/features.json` id.
+	- For legacy v1 entries: renames the linked `<file>.js` (if found) and updates the legacy list `file` field.
+- Toolbox entry: “Rename Feature ID”.
+
+### Notes
+- Safeguards prevent collisions (existing folder/id or file names). No-op if the same id is entered.
+
 ## [1.0.2] - 2025-09-05
 
 ### Added

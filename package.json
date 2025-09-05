@@ -8,7 +8,7 @@
     "type": "git",
     "url": "https://github.com/daniel4-scratch/scratchtools-vscode"
   },
-  "version": "1.0.2",
+  "version": "1.0.3",
   "engines": {
     "vscode": "^1.81.0"
   },
@@ -69,6 +69,10 @@
       "command": "scratchtools.convertV1ToV2",
       "title": "ScratchTools: Convert legacy to v2",
       "icon": "$(arrow-right)"
+    },{
+      "command": "scratchtools.renameFeature",
+      "title": "ScratchTools: Rename Feature ID",
+      "icon": "$(edit)"
     }],
     "viewsContainers": {
       "activitybar": [
@@ -126,6 +130,11 @@
           "command": "scratchtools.featureAdd",
           "when": "view == scratchtoolsFeatures && viewItem == scratchtoolsFeature",
           "group": "inline@1"
+        },
+        {
+          "command": "scratchtools.renameFeature",
+          "when": "view == scratchtoolsFeatures && (viewItem == scratchtoolsFeature || viewItem == scratchtoolsLegacyFeature)",
+          "group": "inline@2.1"
         },
         {
           "command": "scratchtools.deleteFeature",
