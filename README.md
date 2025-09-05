@@ -1,49 +1,83 @@
 # ScratchTools for VS Code
 
-A helper extension for developing ScratchTools features. Quickly scaffold feature JSON, and manage your project files right from VS Code.
+Build and manage ScratchTools features from VS Code. Scaffold feature files, validate JSON, and manage features from a dedicated view.
 
-## Features
+## What you get
 
-Current commands:
+- Command palette toolbox to scaffold:
+	- Add Feature (creates `features/<id>/data.json` and updates the features list; auto-detects versionAdded if left blank)
+	- Add Userscript, Add Userstyle, Add Resource (attach to an existing feature)
+- ScratchTools view (Activity Bar):
+	- Indexes from features lists:
+		- v2: `features/features.json` entries like `{ "version": 2, "id": "my-feature" }`
+		- v1: legacy `./features.json` entries with `title`/`file`
+	- Each feature expands to show its files (data.json, scripts, styles, resources)
+	- Inline actions on feature rows: Open, Add (+), Delete
+	- Quick Search (filter by name/id)
+- JSON validation:
+	- `features/*/data.json` validated against the included schema
+	- `features/features.json` validated, with warnings surfaced for legacy formats
 
-- ScratchTools: Add Feature — prompts for a title, id, description, and versionAdded; creates `features/<id>/data.json` and updates `features/features.json`.
-	- Leave versionAdded blank to auto-use the current project version (from manifest.json or package.json).
+## Quick start
 
-## Add a new feature (command palette)
+1) Open the Command Palette → “ScratchTools: Add Feature”.
+- Enter Title, ID, Description, and optionally versionAdded (blank = auto-detect from `manifest.json` or `package.json`).
 
-Open the Command Palette and run "ScratchTools: Add Feature". You'll be prompted for:
+2) Use the ScratchTools view:
+- Expand a feature to see `data.json`, scripts, styles, and resources.
+- Click the magnifier icon to filter.
+- Use the inline + to add a userscript/userstyle/resource.
+- Use the trash icon to delete a feature (removes folder and list entry).
 
-- Feature title
-- Feature ID (creates `features/<id>/`)
-- Feature description
-- versionAdded (leave blank to auto-detect)
+## Data shapes
 
-What it does:
+- data.json (example):
 
-- Creates `features/<id>/data.json` with a starter template per the ScratchTools docs.
-- Inserts an entry at the top of `features/features.json` array: `{ version: 2, id, versionAdded }`.
+```json
+{
+	"title": "More Scratch News",
+	"description": "On the main page, scroll through the Scratch News section and load more results.",
+	"credits": [{ "username": "rgantzos", "url": "https://scratch.mit.edu/users/rgantzos/" }],
+	"type": ["Website"],
+	"tags": ["New", "Featured"],
+	"dynamic": true,
+	"default": true,
+	"resources": [{ "name": "my-resource", "path": "/resource.svg" }],
+	"options": [{ "id": "option-id", "name": "My Option", "type": 1 }],
+	"scripts": [{ "file": "script.js", "runOn": "/" }],
+	"styles": [{ "file": "style.css", "runOn": "/" }]
+}
+```
 
-References:
+- features list (v2):
 
-- Feature JSON: https://docs.scratchtools.app/docs/contributing/featurejson
-- Adding to features.json: https://docs.scratchtools.app/docs/contributing/allfeatures
+```json
+[
+	{ "version": 2, "id": "admin-notifications", "versionAdded": "1.0.0" }
+]
+```
 
-## Requirements
+- features list (v1 legacy):
 
-No special requirements.
+```json
+[
+	{
+		"title": "Nicknames",
+		"file": "nicknames",
+		"type": ["Website"],
+		"dynamic": false
+	}
+]
+```
 
-## Extension Settings
+## Keybinding
 
-This extension does not add any settings.
+- Open Toolbox: Ctrl+Alt+T (Windows/Linux) or Cmd+Alt+T (macOS).
 
-## Known Issues
+## Known issues
 
-macOS VS Code test harness can be flaky (spawn path). Packaging and runtime are unaffected.
+- macOS VS Code test harness can be flaky (spawn path). Packaging and runtime are unaffected.
 
-## Release Notes
+## Release notes
 
-See CHANGELOG.md for details.
-
----
-
-**Enjoy!**
+See CHANGELOG.md.

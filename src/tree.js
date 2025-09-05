@@ -38,7 +38,6 @@ class FeaturesProvider {
     this._onDidChangeTreeData = new vscode.EventEmitter();
     this.onDidChangeTreeData = this._onDidChangeTreeData.event;
   this._filter = '';
-  this._warnedLegacyFeatures = false;
   }
 
   refresh() { this._onDidChangeTreeData.fire(); }
@@ -70,14 +69,7 @@ class FeaturesProvider {
           const raw = fs.readFileSync(listPath, 'utf8') || '[]';
           const arr = JSON.parse(raw);
           if (!Array.isArray(arr)) continue;
-          const isV2List = listPath.startsWith(featuresDir + path.sep);
-          if (isV2List && !this._warnedLegacyFeatures) {
-            const missingVersion = arr.some(e => e && typeof e === 'object' && !('version' in e));
-            if (missingVersion) {
-              this._warnedLegacyFeatures = true;
-              vscode.window.showWarningMessage('features/features.json entries missing "version" detected. This looks like an old format and should not be used.');
-            }
-          }
+          // intentionally no legacy warnings
           for (let i = 0; i < arr.length; i++) {
             const entry = arr[i];
             if (!entry || typeof entry !== 'object') continue;

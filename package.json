@@ -8,23 +8,14 @@
     "type": "git",
     "url": "https://github.com/daniel4-scratch/scratchtools-vscode"
   },
-  "version": "1.0.0",
+  "version": "1.0.2",
   "engines": {
     "vscode": "^1.81.0"
   },
   "categories": [
     "Other"
   ],
-  "activationEvents": [
-    "onView:scratchtoolsFeatures",
-    "onCommand:scratchtools.toolbox",
-    "onCommand:scratchtools.addFeature",
-    "onCommand:scratchtools.addUserscript",
-    "onCommand:scratchtools.addUserstyle",
-    "onCommand:scratchtools.addResource",
-    "onCommand:scratchtools.refreshFeatures",
-    "onCommand:scratchtools.openFeatureData"
-  ],
+  "activationEvents": [],
   "main": "./extension.js",
   "contributes": {
     "commands": [{
