@@ -1,7 +1,7 @@
 const vscode = require("vscode");
 const path = require('path');
 const fs = require('fs');
-const { runAddFeatureFlow, addUserscriptFlow, addUserstyleFlow, addResourceFlow } = require('./src/feature');
+const { runAddFeatureFlow, addUserscriptFlow, addUserstyleFlow, addResourceFlow, convertV1ToV2Flow } = require('./src/feature');
 const { FeaturesProvider } = require('./src/tree');
 
 function activate(context) {
@@ -277,7 +277,8 @@ function activate(context) {
         { label: "$(add) Add a new feature", description: "Add a new feature to your ScratchTools project" },
         { label: "$(file-code) Add Userscript", description: "Create a userscript and attach it to data.json" },
         { label: "$(symbol-color) Add Userstyle", description: "Create a userstyle and attach it to data.json" },
-        { label: "$(file-media) Add Resource", description: "Copy a file into the feature and register it as a resource" }
+        { label: "$(file-media) Add Resource", description: "Copy a file into the feature and register it as a resource" },
+        { label: "$(arrow-right) Convert legacy to v2", description: "Migrate legacy entries to v2" }
       ];
       const selection = await vscode.window.showQuickPick(quickPickData);
       if (!selection) return;
@@ -285,6 +286,7 @@ function activate(context) {
       if (selection.label === "$(file-code) Add Userscript") await addUserscriptFlow();
       if (selection.label === "$(symbol-color) Add Userstyle") await addUserstyleFlow();
       if (selection.label === "$(file-media) Add Resource") await addResourceFlow();
+      if (selection.label === "$(arrow-right) Convert legacy to v2") await convertV1ToV2Flow();
       provider.refresh();
     } catch (e) {
       console.error(e);
@@ -308,6 +310,12 @@ function activate(context) {
     await addResourceFlow(node);
     provider.refresh();
   });
+
+  // Convert legacy to v2 (toolbar/context)
+  context.subscriptions.push(vscode.commands.registerCommand('scratchtools.convertV1ToV2', async (node) => {
+    try { await convertV1ToV2Flow(node); provider.refresh(); }
+    catch (e) { vscode.window.showErrorMessage(`Convert failed: ${e.message}`); }
+  }));
 
   // Open data.json from selected feature in tree
   context.subscriptions.push(vscode.commands.registerCommand('scratchtools.openFeatureData', async (node) => {

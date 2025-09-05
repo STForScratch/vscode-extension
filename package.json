@@ -65,6 +65,10 @@
       "command": "scratchtools.deleteNode",
       "title": "ScratchTools: Delete File",
       "icon": "$(trash)"
+    },{
+      "command": "scratchtools.convertV1ToV2",
+      "title": "ScratchTools: Convert legacy to v2",
+      "icon": "$(arrow-right)"
     }],
     "viewsContainers": {
       "activitybar": [
@@ -100,6 +104,11 @@
           "command": "scratchtools.searchFeatures",
           "when": "view == scratchtoolsFeatures",
           "group": "navigation@3"
+        },
+        {
+          "command": "scratchtools.convertV1ToV2",
+          "when": "view == scratchtoolsFeatures",
+          "group": "navigation@4"
         }
       ],
       "view/item/context": [
@@ -107,6 +116,11 @@
           "command": "scratchtools.openNode",
           "when": "view == scratchtoolsFeatures && viewItem =~ /scratchtools.*/",
           "group": "inline@0"
+        },
+        {
+          "command": "scratchtools.convertV1ToV2",
+          "when": "view == scratchtoolsFeatures && viewItem == scratchtoolsLegacyFeature",
+          "group": "inline@1"
         },
         {
           "command": "scratchtools.featureAdd",

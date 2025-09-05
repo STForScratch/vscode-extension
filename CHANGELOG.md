@@ -4,6 +4,22 @@ All notable changes to this project will be documented in this file.
 
 The format is based on Keep a Changelog and this project adheres to Semantic Versioning.
 
+## [1.0.2] - 2025-09-05
+
+### Added
+- Convert legacy to v2:
+	- Toolbar button in the Features view, toolbox entry, and per-item inline action on legacy rows.
+	- Converts selected legacy entries or all at once; scaffolds folders and registers a script when a legacy JS is found.
+- Delete file (scripts/styles/resources) with Undo:
+	- Removes the file from disk and its references from `data.json` arrays.
+	- One-click Undo restores both the file and its entries at original positions.
+- Delete v1 features:
+	- Removes the legacy list entry by `file` and deletes the linked script if present.
+- Open for v1 features jumps to the corresponding entry in `features/features.json`.
+
+### Changed
+- Removed the warning about missing `version` in `features/features.json` entries.
+
 ## [1.0.1] - 2025-09-05
 
 ### Added

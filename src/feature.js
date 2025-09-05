@@ -231,5 +231,92 @@ module.exports = {
     runAddFeatureFlow,
     addUserscriptFlow,
     addUserstyleFlow,
-    addResourceFlow
+    addResourceFlow,
+    convertV1ToV2Flow
 };
+
+async function convertV1ToV2Flow(target) {
+    const folders = vscode.workspace.workspaceFolders;
+    if (!folders || folders.length === 0) { vscode.window.showErrorMessage('Open a workspace.'); return; }
+    const root = folders[0].uri.fsPath;
+    const featuresDir = path.join(root, 'features');
+    const listPath = path.join(featuresDir, 'features.json');
+    if (!fs.existsSync(listPath)) { vscode.window.showInformationMessage('features/features.json not found.'); return; }
+    let arr;
+    try {
+        arr = JSON.parse(fs.readFileSync(listPath, 'utf8') || '[]');
+    } catch (e) {
+        vscode.window.showErrorMessage(`Could not parse features/features.json: ${e.message}`);
+        return;
+    }
+    if (!Array.isArray(arr)) { vscode.window.showErrorMessage('features/features.json is not an array.'); return; }
+
+    // Filter legacy entries when a specific legacy node is targeted
+    let candidates = arr.filter(e => e && typeof e === 'object' && e.version !== 2);
+    if (target && target.kind === 'v1') {
+        const fileBase = target.fileBase || target.featureId;
+        candidates = candidates.filter(e => e && (e.file === fileBase || e.id === fileBase));
+    }
+    if (candidates.length === 0) { vscode.window.showInformationMessage('No legacy entries to convert.'); return; }
+
+    const confirmed = await vscode.window.showWarningMessage(
+        `Convert ${candidates.length} legacy feature(s) to v2?`, { modal: true }, 'Convert'
+    );
+    if (confirmed !== 'Convert') return;
+
+    const versionAdded = await detectProjectVersion(root) || '...';
+    let converted = 0;
+    const newArr = [];
+
+    for (const entry of arr) {
+        if (!entry || typeof entry !== 'object') { newArr.push(entry); continue; }
+        if (entry.version === 2) { newArr.push(entry); continue; }
+        // Legacy
+        const id = (entry.id && String(entry.id)) || (entry.file && String(entry.file));
+        const title = (entry.title && String(entry.title)) || id || 'Untitled Feature';
+        if (!id) { newArr.push(entry); continue; }
+
+        // Scaffold folder and data.json if missing
+        scaffoldFeatureDataJson(root, { id, title, description: '' });
+
+        // Try to move legacy script into feature folder (best-effort)
+        try {
+            const guesses = [
+                path.join(featuresDir, `${id}.js`),
+                path.join(root, `${id}.js`)
+            ];
+            let found;
+            for (const g of guesses) { if (fs.existsSync(g)) { found = g; break; } }
+            if (found) {
+                const dest = path.join(featuresDir, id, path.basename(found));
+                if (!fs.existsSync(dest)) {
+                    try {
+                        fs.renameSync(found, dest);
+                    } catch (e) {
+                        try { fs.copyFileSync(found, dest); } catch (e2) { /* ignore */ }
+                    }
+                }
+                // Register script in data.json
+                const { path: dataPath, data } = readFeatureData(root, id);
+                data.scripts = Array.isArray(data.scripts) ? data.scripts : [];
+                if (!data.scripts.some(s => s && s.file === path.basename(dest))) {
+                    data.scripts.push({ file: path.basename(dest), runOn: '/' });
+                    writeFeatureData(dataPath, data);
+                }
+            }
+        } catch (e) {
+            // ignore
+        }
+
+        // Add v2 entry
+        newArr.push({ version: 2, id, versionAdded });
+        converted++;
+    }
+
+    // Persist updated list
+    try { fs.writeFileSync(listPath, JSON.stringify(newArr, null, 2)); } catch (e) {
+        vscode.window.showErrorMessage(`Failed writing features/features.json: ${e.message}`);
+        return;
+    }
+    vscode.window.showInformationMessage(`Converted ${converted} legacy feature(s) to v2.`);
+}
