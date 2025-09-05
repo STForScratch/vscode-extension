@@ -60,8 +60,7 @@ class FeaturesProvider {
     if (!element) {
       const items = [];
       const lists = [
-        path.join(featuresDir, 'features.json'),
-        path.join(root, 'features.json')
+        path.join(featuresDir, 'features.json')
       ];
       for (const listPath of lists) {
         try {

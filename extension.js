@@ -70,6 +70,32 @@ function activate(context) {
         await vscode.window.showTextDocument(node.resourceUri, { preview: false });
         return;
       }
+      // Legacy v1 feature: open ./features.json and reveal the entry
+      if (node.kind === 'v1') {
+        const folders = vscode.workspace.workspaceFolders;
+        if (!folders || folders.length === 0) return;
+        const root = folders[0].uri.fsPath;
+        const featuresDir = path.join(root, 'features');
+        const v1Path = path.join(featuresDir, 'features.json');
+        if (!fs.existsSync(v1Path)) {
+          vscode.window.showWarningMessage('Legacy features.json not found at workspace root.');
+          return;
+        }
+        const doc = await vscode.workspace.openTextDocument(v1Path);
+        const editor = await vscode.window.showTextDocument(doc, { preview: false });
+        const text = doc.getText();
+        const needle = node.fileBase || node.featureId || String(node.label || '');
+        // Find the occurrence of the file property for this legacy entry
+        const pattern = new RegExp(String.raw`"file"\s*:\s*"${needle.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}"`);
+        const match = pattern.exec(text);
+        if (match) {
+          const start = doc.positionAt(match.index);
+          const end = doc.positionAt(match.index + match[0].length);
+          editor.selection = new vscode.Selection(start, end);
+          editor.revealRange(new vscode.Range(start, end), vscode.TextEditorRevealType.InCenter);
+        }
+        return;
+      }
       if (node.featureId) {
         const folders = vscode.workspace.workspaceFolders;
         if (!folders || folders.length === 0) return;
