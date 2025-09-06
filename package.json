@@ -2,7 +2,7 @@
   "name": "scratchtools-vscode",
   "displayName": "ScratchTools Extension",
   "description": "An extension for managing ScratchTools features, userscripts, and userstyles within VSCode.",
-  "publisher": "daniel4-scratch",
+  "publisher": "scratchtools",
   "icon":"icon.png",
   "repository": {
     "type": "git",
