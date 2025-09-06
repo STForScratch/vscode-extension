@@ -1,0 +1,22 @@
+name: Publish VS Code Extension
+
+on:
+  workflow_dispatch:
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install vsce
+        run: npm install -g vsce
+
+      - name: Publish extension
+        run: vsce publish --pat ${{ secrets.VSCE_TOKEN }}
